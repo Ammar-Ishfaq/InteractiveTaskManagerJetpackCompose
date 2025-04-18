@@ -1,44 +1,72 @@
 package com.m.ammar.itaskmanager.ui.home
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieAnimation
@@ -68,6 +96,9 @@ fun HomeScreen(
     onCreateNewTask: () -> Unit,
     onTaskClick: (taskId: Int) -> Unit
 ) {
+
+
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -75,20 +106,23 @@ fun HomeScreen(
                     Column {
                         Text(
                             text = stringResource(id = R.string.app_name),
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                        Text(
-                            text = "Manage your day like a boss 💼",
-                            style = MaterialTheme.typography.labelSmall
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                         )
                     }
                 },
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                ),
+                actions = {
+                    FilterSortActionButtons(
+                        sortOption = sortOption,
+                        filterOption = filterOption,
+                        onSortChange = onSortChange,
+                        onFilterChange = onFilterChange
+                    )
+                }
             )
-
         },
         floatingActionButton = {
             val haptic = LocalHapticFeedback.current
@@ -111,21 +145,18 @@ fun HomeScreen(
                 }
 
                 is HomeScreenUiState.Success -> {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        TaskFilterSortBar(
-                            selectedSort = sortOption,
-                            selectedFilter = filterOption,
-                            onSortChange = onSortChange,
-                            onFilterChange = onFilterChange
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        HomeScreenContent(
-                            tasks = tasks,
-                            onTaskClick = onTaskClick
-                        )
+                    AnimatedVisibility(
+                        visible = tasks.isNotEmpty(),
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        TaskStatsHeader(tasks = tasks)
                     }
+
+                    HomeScreenContent(
+                        tasks = tasks,
+                        onTaskClick = onTaskClick
+                    )
                 }
 
                 is HomeScreenUiState.Error -> {
@@ -137,23 +168,6 @@ fun HomeScreen(
 
                 HomeScreenUiState.Initial -> Unit
             }
-        }
-    }
-}
-
-
-@Composable
-private fun HomeScreenContent(
-    tasks: List<Task>, // Task data passed from UIState
-    onTaskClick: (taskId: Int) -> Unit
-) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(tasks.size) { index ->
-            TaskItem(task = tasks[index], onClick = { onTaskClick(tasks[index].id) })
-
         }
     }
 }
@@ -194,92 +208,361 @@ fun EmptyTaskView() {
 
 
 @Composable
-fun TaskItem(task: Task, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp)
-            .clickable { onClick() }
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = task.title, style = MaterialTheme.typography.titleMedium)
-            task.description?.let {
-                Text(text = it, style = MaterialTheme.typography.bodyMedium)
-            }
-            Text(text = "Priority: ${task.priority}", style = MaterialTheme.typography.labelSmall)
-            Text(
-                text = "Due: ${task.dueDate.toReadableDate()}",
-                style = MaterialTheme.typography.labelSmall
-            )
-        }
-    }
-}
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun TaskFilterSortBar(
-    selectedSort: SortOption,
-    selectedFilter: FilterOption,
+private fun FilterSortActionButtons(
+    sortOption: SortOption,
+    filterOption: FilterOption,
     onSortChange: (SortOption) -> Unit,
     onFilterChange: (FilterOption) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var showSortDialog by remember { mutableStateOf(false) }
+    var showFilterDialog by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        // SORT - DROPDOWN
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .padding(8.dp)
-        ) {
-            Text("Sort by:", style = MaterialTheme.typography.labelMedium)
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Box {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(end = 8.dp)
+    ) {
+        // Filter Button
+        FilterChip(
+            selected = filterOption != FilterOption.ALL,
+            onClick = { showFilterDialog = true },
+            label = {
                 Text(
-                    text = selectedSort.name.lowercase().replaceFirstChar { it.uppercase() },
-                    modifier = Modifier
-                        .clickable { expanded = true }
-                        .padding(8.dp),
-                    style = MaterialTheme.typography.bodyMedium
+                    text = "Filter",
+                    style = MaterialTheme.typography.labelMedium
                 )
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
+            },
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.filter),
+                    contentDescription = "Filter",
+                    modifier = Modifier.size(18.dp)
+                )
+            },
+            colors = FilterChipDefaults.filterChipColors(
+                selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+        )
+
+        // Sort Button
+        FilterChip(
+            selected = sortOption != SortOption.DUE_DATE,
+            onClick = { showSortDialog = true },
+            label = {
+                Text(
+                    text = "Sort",
+                    style = MaterialTheme.typography.labelMedium
+                )
+            },
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.sort),
+                    contentDescription = "Sort",
+                    modifier = Modifier.size(18.dp)
+                )
+            },
+            colors = FilterChipDefaults.filterChipColors(
+                selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer
+            )
+        )
+    }
+
+    // Sort Dialog
+    if (showSortDialog) {
+        AlertDialog(
+            onDismissRequest = { showSortDialog = false },
+            title = { Text("Sort Tasks") },
+            text = {
+                Column {
                     SortOption.entries.forEach { option ->
-                        DropdownMenuItem(
-                            text = { Text(option.name.lowercase().replaceFirstChar { it.uppercase() }) },
-                            onClick = {
+                        RadioButtonItem(
+                            text = option.name,
+                            selected = option == sortOption,
+                            onSelect = {
                                 onSortChange(option)
-                                expanded = false
+                                showSortDialog = false
                             }
                         )
                     }
                 }
+            },
+            confirmButton = {
+                TextButton(onClick = { showSortDialog = false }) {
+                    Text("DONE")
+                }
+            }
+        )
+    }
+
+    // Filter Dialog
+    if (showFilterDialog) {
+        AlertDialog(
+            onDismissRequest = { showFilterDialog = false },
+            title = { Text("Filter Tasks") },
+            text = {
+                Column {
+                    FilterOption.entries.forEach { option ->
+                        RadioButtonItem(
+                            text = option.name,
+                            selected = option == filterOption,
+                            onSelect = {
+                                onFilterChange(option)
+                                showFilterDialog = false
+                            }
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showFilterDialog = false }) {
+                    Text("DONE")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun RadioButtonItem(
+    text: String,
+    selected: Boolean,
+    onSelect: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onSelect)
+            .padding(vertical = 8.dp)
+    ) {
+        RadioButton(
+            selected = selected,
+            onClick = null,
+            modifier = Modifier.padding(end = 16.dp)
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun TaskStatsHeader(tasks: List<Task>) {
+    val completedCount = tasks.count { it.isCompleted }
+    val overdueCount = tasks.count { it.dueDate < System.currentTimeMillis() && !it.isCompleted }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            TaskStatItem(
+                count = tasks.size,
+                label = "Total",
+                painter = painterResource(id = R.drawable.all),
+                color = MaterialTheme.colorScheme.primary
+            )
+            TaskStatItem(
+                count = completedCount,
+                label = "Done",
+                icon = Icons.Default.CheckCircle,
+                color = MaterialTheme.colorScheme.tertiary
+            )
+            TaskStatItem(
+                count = overdueCount,
+                label = "Overdue",
+                icon = Icons.Default.Warning,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+    }
+}
+
+@Composable
+private fun TaskStatItem(count: Int, label: String, icon: ImageVector, color: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = color,
+                modifier = Modifier.size(18.dp),
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = count.toString(),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = color
+            )
+        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun TaskStatItem(count: Int, label: String, painter: Painter, color: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                painter = painter,
+                contentDescription = label,
+                tint = color,
+                modifier = Modifier.size(18.dp),
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = count.toString(),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = color
+            )
+        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun HomeScreenContent(
+    tasks: List<Task>,
+    onTaskClick: (taskId: Int) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        items(tasks, key = { it.id }) { task ->
+            AnimatedVisibility(
+                visible = true,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                TaskItem(task = task, onClick = { onTaskClick(task.id) })
             }
         }
+    }
+}
 
-        // FILTER - CHIPS
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier.padding(8.dp)
-        ) {
-            Text("Filter:", style = MaterialTheme.typography.labelMedium)
-            FilterOption.entries.forEach { option ->
-                FilterChip(
-                    selected = option == selectedFilter,
-                    onClick = { onFilterChange(option) },
-                    label = {
-                        Text(option.name.lowercase().replaceFirstChar { it.uppercase() })
+@Composable
+fun TaskItem(task: Task, onClick: () -> Unit) {
+    val isOverdue = !task.isCompleted && task.dueDate < System.currentTimeMillis()
+    val priorityColor = when (task.priority) {
+        Priority.HIGH -> MaterialTheme.colorScheme.errorContainer
+        Priority.MEDIUM -> MaterialTheme.colorScheme.tertiaryContainer
+        Priority.LOW -> MaterialTheme.colorScheme.secondaryContainer
+    }
+    val priorityContentColor = when (task.priority) {
+        Priority.HIGH -> MaterialTheme.colorScheme.onErrorContainer
+        Priority.MEDIUM -> MaterialTheme.colorScheme.onTertiaryContainer
+        Priority.LOW -> MaterialTheme.colorScheme.onSecondaryContainer
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(
+            containerColor = if (task.isCompleted) {
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            } else {
+                MaterialTheme.colorScheme.surface
+            }
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = task.title,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+
+                if (isOverdue) {
+                    Text(
+                        text = "OVERDUE",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
+            }
+
+            task.description?.let { desc ->
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = desc,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None
+                    ),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .clip(MaterialTheme.shapes.small)
+                        .background(priorityColor)
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = task.priority.toString(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = priorityContentColor
+                    )
+                }
+
+                Text(
+                    text = "Due ${task.dueDate.toReadableDate()}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (isOverdue) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
                     }
                 )
             }
         }
     }
 }
-
-
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
