@@ -9,21 +9,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.m.ammar.itaskmanager.ui.StyledErrorSnackbarHost
+import com.m.ammar.itaskmanager.data.local.model.Priority
+import com.m.ammar.itaskmanager.ui.components.StyledErrorSnackbarHost
 import kotlinx.coroutines.launch
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskCreationScreen(
-    onSaveClick: (title: String, description: String?, priority: String, dueDateMillis: Long) -> Unit
+    onSaveClick: (title: String, description: String?, priority: Priority, dueDateMillis: Long) -> Unit
 ) {
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
     var title by remember { mutableStateOf(TextFieldValue("")) }
     var description by remember { mutableStateOf(TextFieldValue("")) }
-    var selectedPriority by remember { mutableStateOf("Low") }
+    var selectedPriority by remember { mutableStateOf(Priority.LOW) }
     var dueDateMillis by remember { mutableStateOf(0L) }
     var dueDateText by remember { mutableStateOf("") }
 
@@ -96,11 +97,11 @@ fun TaskCreationScreen(
 
             Text("Priority:")
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf("Low", "Medium", "High").forEach { priority ->
+                Priority.entries.forEach { priority ->
                     FilterChip(
                         selected = selectedPriority == priority,
                         onClick = { selectedPriority = priority },
-                        label = { Text(priority) }
+                        label = { Text(priority.name) }
                     )
                 }
             }

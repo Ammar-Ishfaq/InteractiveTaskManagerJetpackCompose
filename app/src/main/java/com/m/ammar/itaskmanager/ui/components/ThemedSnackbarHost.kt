@@ -1,4 +1,4 @@
-package com.m.ammar.itaskmanager.ui
+package com.m.ammar.itaskmanager.ui.components
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme

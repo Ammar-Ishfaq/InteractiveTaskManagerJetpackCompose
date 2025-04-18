@@ -8,6 +8,7 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Update
 import com.m.ammar.itaskmanager.data.local.model.Task
+import kotlinx.coroutines.flow.Flow
 
 
 @Dao
@@ -33,4 +34,8 @@ interface TaskDao {
 
     @Query("SELECT * FROM tasks ORDER BY title")
     suspend fun getTasksSortedAlphabetically(): List<Task>
+
+    @Query("SELECT * FROM tasks")
+    fun getAllTasksFlow(): Flow<List<Task>>
+
 }

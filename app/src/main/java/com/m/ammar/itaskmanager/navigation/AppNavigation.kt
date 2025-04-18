@@ -1,6 +1,8 @@
 package com.m.ammar.itaskmanager.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -25,20 +27,29 @@ fun AppNavigation(
         startDestination = TopLevelDestination.Home.route
     ) {
         composable(route = TopLevelDestination.Home.route) {
-            val homeViewModel: HomeViewModel = hiltViewModel()
-            val homeScreenUiState by remember { homeViewModel.response }.collectAsStateWithLifecycle()
+
+            val viewModel: HomeViewModel = hiltViewModel()
+            val uiState by remember { viewModel.response }.collectAsStateWithLifecycle()
+            val tasks by viewModel.tasksFlow.collectAsState()
+            val currentSort by viewModel.sortOption.collectAsState()
+            val currentFilter by viewModel.filterOption.collectAsState()
+
+            LaunchedEffect(Unit) {
+                viewModel.loadData()
+            }
 
             HomeScreen(
-                uiState = homeScreenUiState,
-                loadData = { homeViewModel.loadData() },
-                onCreateNewTask = {
-                    navController.navigate(TopLevelDestination.CreateTask.route)
-                },
-                onTaskClick = {
-
-                }
+                uiState = uiState,
+                tasks = tasks,
+                sortOption = currentSort,
+                filterOption = currentFilter,
+                onSortChange = { viewModel.setSortOption(it) },
+                onFilterChange = { viewModel.setFilterOption(it) },
+                onCreateNewTask = { navController.navigate(TopLevelDestination.CreateTask.route) },
+                onTaskClick = { }
             )
         }
+
         composable(route = TopLevelDestination.CreateTask.route) {
             val homeViewModel: HomeViewModel = hiltViewModel()
 
@@ -47,11 +58,11 @@ fun AppNavigation(
                     title = title,
                     description = description,
                     priority = priority,
-                    dueDate = dueDate, // stored in millis
+                    dueDate = dueDate,
                     isCompleted = false
                 )
                 homeViewModel.addTask(task)
-                navController.popBackStack() // Go back to HomeScreen after saving
+                navController.popBackStack()
             }
 
         }

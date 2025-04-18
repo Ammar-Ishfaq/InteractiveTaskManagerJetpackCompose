@@ -1,15 +1,18 @@
 package com.m.ammar.itaskmanager.ui.home
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.m.ammar.itaskmanager.data.local.db.AppDatabase
+import com.m.ammar.itaskmanager.data.enums.FilterOption
+import com.m.ammar.itaskmanager.data.enums.SortOption
 import com.m.ammar.itaskmanager.data.local.dao.TaskDao
 import com.m.ammar.itaskmanager.data.local.model.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,11 +27,12 @@ class HomeViewModel @Inject constructor(
 
     fun loadData() {
         viewModelScope.launch {
-            _response.value = HomeScreenUiState.Loading
+            _response.value = HomeScreenUiState.Empty
             try {
                 val tasks =
-                    taskDao.getTasksSortedByPriority() // You can add logic to sort/filter differently
-                _response.value = HomeScreenUiState.Success(tasks = tasks)
+                    taskDao.getTasksSortedByPriority()
+                _allTasks.value = tasks
+                if (tasks.isNotEmpty()) _response.value = HomeScreenUiState.Success(tasks = tasks)
             } catch (e: Exception) {
                 _response.value = HomeScreenUiState.Error(
                     msg = e.message ?: "Something went wrong"
@@ -40,40 +44,68 @@ class HomeViewModel @Inject constructor(
     fun addTask(task: Task) {
         viewModelScope.launch {
             taskDao.insertTask(task)
-            loadData() // Reload list after adding
+            loadData()
         }
     }
 
     fun deleteTask(task: Task) {
         viewModelScope.launch {
             taskDao.deleteTask(task)
-            loadData() // Reload list after deletion
+            loadData()
         }
     }
 
     fun updateTask(task: Task) {
         viewModelScope.launch {
             taskDao.updateTask(task)
-            loadData() // Reload list after update
+            loadData()
         }
     }
 
+    private val _sortOption = MutableStateFlow(SortOption.DUE_DATE)
+    val sortOption = _sortOption.asStateFlow() // Now reactive
 
-//    var sortOption by mutableStateOf(SortOption.PRIORITY)
-//    var filterOption by mutableStateOf(FilterOption.ALL)
-//
-//    val tasksFlow = repo.taskDao.getAllTasksFlow().map { tasks ->
-//        val filtered = when (filterOption) {
-//            FilterOption.ALL -> tasks
-//            FilterOption.COMPLETED -> tasks.filter { it.isCompleted }
-//            FilterOption.PENDING -> tasks.filter { !it.isCompleted }
-//        }
-//
-//        when (sortOption) {
-//            SortOption.PRIORITY -> filtered.sortedBy { it.priority }
-//            SortOption.DUE_DATE -> filtered.sortedBy { it.dueDate }
-//            SortOption.ALPHABETICAL -> filtered.sortedBy { it.title }
-//        }
-//    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+    private val _filterOption = MutableStateFlow(FilterOption.ALL)
+    val filterOption = _filterOption.asStateFlow() // Now reactive
 
+
+    private val _allTasks = MutableStateFlow<List<Task>>(emptyList())
+
+    val tasksFlow = combine(
+        _allTasks,
+        _sortOption,
+        _filterOption
+    ) { tasks, sort, filter ->
+        tasks
+            .applyFilter(filter)
+            .applySort(sort)
+
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(50000),
+        emptyList()
+
+
+    )
+
+    fun setSortOption(option: SortOption) {
+        _sortOption.value = option
+    }
+
+    fun setFilterOption(option: FilterOption) {
+        _filterOption.value = option
+    }
+
+
+    private fun List<Task>.applySort(sort: SortOption): List<Task> = when (sort) {
+        SortOption.DUE_DATE -> sortedBy { it.dueDate }
+        SortOption.PRIORITY -> sortedBy { it.priority.weight }
+        SortOption.ALPHABETICAL -> sortedBy { it.title.lowercase() }
+    }
+
+    private fun List<Task>.applyFilter(filter: FilterOption): List<Task> = when (filter) {
+        FilterOption.ALL -> this
+        FilterOption.COMPLETED -> filter { it.isCompleted }
+        FilterOption.PENDING -> filter { !it.isCompleted }
+    }
 }

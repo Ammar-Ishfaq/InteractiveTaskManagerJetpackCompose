@@ -91,5 +91,6 @@ dependencies {
     implementation(libs.roomRuntime)
     ksp(libs.roomCompiler)
     implementation(libs.roomKtx)
+    implementation(libs.lottie.compose)
 
 }

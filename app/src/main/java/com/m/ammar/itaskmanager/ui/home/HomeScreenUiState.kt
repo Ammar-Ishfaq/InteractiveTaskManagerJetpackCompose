@@ -7,7 +7,7 @@ import com.m.ammar.itaskmanager.data.local.model.Task
  */
 sealed interface HomeScreenUiState {
     data object Initial : HomeScreenUiState
-    data object Loading : HomeScreenUiState
+    data object Empty : HomeScreenUiState
     data class Success(val tasks: List<Task>) : HomeScreenUiState
     data class Error(val msg: String) : HomeScreenUiState
 }
