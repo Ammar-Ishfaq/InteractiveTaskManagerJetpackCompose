@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
@@ -49,6 +50,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,6 +64,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -81,6 +84,7 @@ import com.m.ammar.itaskmanager.data.local.model.Task
 import com.m.ammar.itaskmanager.ui.components.AppLoader
 import com.m.ammar.itaskmanager.ui.components.ErrorItem
 import com.m.ammar.itaskmanager.utility.toReadableDate
+import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -96,7 +100,6 @@ fun HomeScreen(
     onCreateNewTask: () -> Unit,
     onTaskClick: (taskId: Int) -> Unit
 ) {
-
 
 
     Scaffold(
@@ -450,15 +453,26 @@ private fun HomeScreenContent(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        items(tasks, key = { it.id }) { task ->
+
+        itemsIndexed(tasks, key = { _, task -> task.id }) { index, task ->
+            val isInPreview = LocalInspectionMode.current
+            val visible = remember { mutableStateOf(false) }
+            if (!isInPreview) {
+                LaunchedEffect(Unit) {
+                    delay(index * 50L)
+                    visible.value = true
+                }
+            }
             AnimatedVisibility(
-                visible = true,
+                visible = (if(isInPreview) true else visible.value),
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically()
             ) {
                 TaskItem(task = task, onClick = { onTaskClick(task.id) })
             }
+
         }
+
     }
 }
 
