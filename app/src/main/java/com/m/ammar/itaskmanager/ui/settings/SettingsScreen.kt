@@ -35,7 +35,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.m.ammar.itaskmanager.data.enums.ThemeMode
+import com.m.ammar.itaskmanager.data.local.enums.ThemeMode
 import com.m.ammar.itaskmanager.data.local.model.ThemeSet
 import com.m.ammar.itaskmanager.ui.theme.ThemeSet1
 import com.m.ammar.itaskmanager.ui.theme.ThemeSet2

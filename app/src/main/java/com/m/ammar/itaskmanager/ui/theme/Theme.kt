@@ -5,7 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import com.m.ammar.itaskmanager.data.enums.ThemeMode
+import com.m.ammar.itaskmanager.data.local.enums.ThemeMode
 import com.m.ammar.itaskmanager.data.local.model.ThemeSet
 
 @Composable

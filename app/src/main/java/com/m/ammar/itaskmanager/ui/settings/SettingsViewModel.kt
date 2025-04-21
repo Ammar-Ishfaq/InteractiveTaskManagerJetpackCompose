@@ -4,7 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.m.ammar.itaskmanager.data.enums.ThemeMode
+import com.m.ammar.itaskmanager.data.local.enums.ThemeMode
 import com.m.ammar.itaskmanager.data.local.data_store.SettingsRepository
 import com.m.ammar.itaskmanager.data.local.model.ThemeSet
 import com.m.ammar.itaskmanager.ui.theme.ThemeSet1

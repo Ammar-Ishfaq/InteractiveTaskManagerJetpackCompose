@@ -78,8 +78,8 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.m.ammar.itaskmanager.R
 import com.m.ammar.itaskmanager.data.SnackbarEvent
-import com.m.ammar.itaskmanager.data.enums.FilterOption
-import com.m.ammar.itaskmanager.data.enums.SortOption
+import com.m.ammar.itaskmanager.data.local.enums.FilterOption
+import com.m.ammar.itaskmanager.data.local.enums.SortOption
 import com.m.ammar.itaskmanager.data.local.model.Priority
 import com.m.ammar.itaskmanager.data.local.model.Task
 import com.m.ammar.itaskmanager.ui.components.BouncyFAB
@@ -555,14 +555,17 @@ fun SwipeableTaskItem(
         backgroundContent = {
             val color by animateColorAsState(
                 when (dismissState.dismissDirection) {
-                    SwipeToDismissBoxValue.StartToEnd -> Color(0xFF388E3C)
+                    SwipeToDismissBoxValue.StartToEnd -> if (task.isCompleted.not()) Color(
+                        0xFF388E3C
+                    ) else Color.Transparent
+
                     SwipeToDismissBoxValue.EndToStart -> Color(0xFFD32F2F)
                     else -> Color.Transparent
                 }
             )
 
             val icon = when (dismissState.dismissDirection) {
-                SwipeToDismissBoxValue.StartToEnd -> Icons.Default.Check
+                SwipeToDismissBoxValue.StartToEnd -> if (task.isCompleted.not()) Icons.Default.Check else null
                 SwipeToDismissBoxValue.EndToStart -> Icons.Default.Delete
                 else -> null
             }
@@ -589,7 +592,7 @@ fun SwipeableTaskItem(
                 }
             }
         },
-        enableDismissFromStartToEnd = true,
+        enableDismissFromStartToEnd = task.isCompleted.not(),
         enableDismissFromEndToStart = true,
         gesturesEnabled = true
     ) {

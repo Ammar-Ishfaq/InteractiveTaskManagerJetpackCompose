@@ -3,8 +3,8 @@ package com.m.ammar.itaskmanager.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.m.ammar.itaskmanager.data.SnackbarEvent
-import com.m.ammar.itaskmanager.data.enums.FilterOption
-import com.m.ammar.itaskmanager.data.enums.SortOption
+import com.m.ammar.itaskmanager.data.local.enums.FilterOption
+import com.m.ammar.itaskmanager.data.local.enums.SortOption
 import com.m.ammar.itaskmanager.data.local.dao.TaskDao
 import com.m.ammar.itaskmanager.data.local.model.Task
 import dagger.hilt.android.lifecycle.HiltViewModel

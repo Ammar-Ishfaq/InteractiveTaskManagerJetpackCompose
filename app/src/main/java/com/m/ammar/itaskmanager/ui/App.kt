@@ -9,7 +9,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.m.ammar.itaskmanager.data.enums.ThemeMode
+import com.m.ammar.itaskmanager.data.local.enums.ThemeMode
 import com.m.ammar.itaskmanager.navigation.AppNavigation
 import com.m.ammar.itaskmanager.ui.settings.SettingsViewModel
 import com.m.ammar.itaskmanager.ui.theme.AppTheme
