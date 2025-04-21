@@ -2,6 +2,7 @@ package com.m.ammar.itaskmanager.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.m.ammar.itaskmanager.data.SnackbarEvent
 import com.m.ammar.itaskmanager.data.enums.FilterOption
 import com.m.ammar.itaskmanager.data.enums.SortOption
 import com.m.ammar.itaskmanager.data.local.dao.TaskDao
@@ -21,24 +22,10 @@ class HomeViewModel @Inject constructor(
     private val taskDao: TaskDao,
 ) : ViewModel() {
 
-
-    private val _response = MutableStateFlow<HomeScreenUiState>(HomeScreenUiState.Initial)
-    val response: StateFlow<HomeScreenUiState> = _response.asStateFlow()
-
     fun loadData() {
         viewModelScope.launch {
-            try {
-                val tasks =
-                    taskDao.getTasksSortedByPriority()
-                _allTasks.value = tasks
-                if (tasks.isNotEmpty()) _response.value = HomeScreenUiState.Success(tasks = tasks)
-                else _response.value = HomeScreenUiState.Empty
-
-            } catch (e: Exception) {
-                _response.value = HomeScreenUiState.Error(
-                    msg = e.message ?: "Something went wrong"
-                )
-            }
+            val tasks = taskDao.getTasksSortedAlphabetically()
+            _allTasks.value = tasks
         }
     }
 
@@ -49,8 +36,10 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private var lastDeleteTask: ArrayList<Task?> = arrayListOf()
     fun deleteTask(task: Task) {
         viewModelScope.launch {
+            lastDeleteTask.add(task)
             taskDao.deleteTask(task)
             loadData()
         }
@@ -115,6 +104,22 @@ class HomeViewModel @Inject constructor(
 
     fun selectTask(task: Task) {
         _selectedTask.value = task
+    }
+
+    fun completeTask(it: Task) {
+        viewModelScope.launch {
+            taskDao.updateTask(it.copy(isCompleted = true))
+            loadData()
+        }
+    }
+
+    fun undoDelete() {
+        viewModelScope.launch {
+            lastDeleteTask.lastOrNull()?.let {
+                lastDeleteTask.remove(it)
+                addTask(it)
+            }
+        }
     }
 
 }

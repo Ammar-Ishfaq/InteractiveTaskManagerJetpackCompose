@@ -27,7 +27,7 @@ interface TaskDao {
     suspend fun getTasksSortedByPriority(): List<Task>
 
     @Query("SELECT * FROM tasks WHERE id = :id")
-    suspend fun getTasksById(id: Int): Task
+    suspend fun getTasksById(id: Int): Task?
 
     @Query("SELECT * FROM tasks WHERE isCompleted = :status")
     suspend fun getTasksByStatus(status: Boolean): List<Task>

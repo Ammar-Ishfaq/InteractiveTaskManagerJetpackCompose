@@ -23,16 +23,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -66,8 +63,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -82,6 +77,7 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.m.ammar.itaskmanager.R
+import com.m.ammar.itaskmanager.data.SnackbarEvent
 import com.m.ammar.itaskmanager.data.enums.FilterOption
 import com.m.ammar.itaskmanager.data.enums.SortOption
 import com.m.ammar.itaskmanager.data.local.model.Priority
@@ -89,6 +85,8 @@ import com.m.ammar.itaskmanager.data.local.model.Task
 import com.m.ammar.itaskmanager.ui.components.BouncyFAB
 import com.m.ammar.itaskmanager.ui.components.ErrorItem
 import com.m.ammar.itaskmanager.utility.toReadableDate
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -97,7 +95,6 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    uiState: HomeScreenUiState,
     tasks: List<Task>,
     sortOption: SortOption,
     filterOption: FilterOption,
@@ -107,7 +104,8 @@ fun HomeScreen(
     onTaskClick: (taskId: Task) -> Unit,
     onTaskCompleted: (task: Task) -> Unit,
     onTaskDeleted: (task: Task) -> Unit,
-    onUndo: (task: Task) -> Unit,
+    onUndoCompleted: (task: Task) -> Unit,
+    onUndoDeleted: (task: Task) -> Unit,
     onSettingsClick: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -150,43 +148,31 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            if (tasks.isEmpty()) {
+                EmptyTaskView()
+            }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                when (uiState) {
-                    is HomeScreenUiState.Empty -> {
-                        EmptyTaskView()
-                    }
-
-                    is HomeScreenUiState.Success -> {
-                        AnimatedVisibility(
-                            visible = tasks.isNotEmpty(),
-                            enter = fadeIn() + expandVertically(),
-                            exit = fadeOut() + shrinkVertically()
-                        ) {
-                            TaskStatsHeader(tasks = tasks)
-                        }
-
-                        HomeScreenContent(
-                            tasks = tasks,
-                            onTaskClick = onTaskClick,
-                            onTaskCompleted = onTaskCompleted,
-                            onTaskDeleted = onTaskDeleted,
-                            snackbarHostState = snackbarHostState,
-                            onUndo = onUndo
-                        )
-                    }
-
-                    is HomeScreenUiState.Error -> {
-                        ErrorItem(
-                            text = uiState.msg,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-
-                    HomeScreenUiState.Initial -> Unit
+                AnimatedVisibility(
+                    visible = tasks.isNotEmpty(),
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    TaskStatsHeader(tasks = tasks)
                 }
+                HomeScreenContent(
+                    tasks = tasks,
+                    onTaskClick = onTaskClick,
+                    onTaskCompleted = onTaskCompleted,
+                    onTaskDeleted = onTaskDeleted,
+                    snackbarHostState = snackbarHostState,
+                    onUndoCompleted = onUndoCompleted,
+                    onUndoDeleted = onUndoDeleted
+                )
+
+
             }
             Box(
                 modifier = Modifier
@@ -467,10 +453,11 @@ private fun HomeScreenContent(
     onTaskCompleted: (task: Task) -> Unit,
     onTaskDeleted: (task: Task) -> Unit,
     snackbarHostState: SnackbarHostState,
-    onUndo: (task: Task) -> Unit,
+    onUndoCompleted: (task: Task) -> Unit,
+    onUndoDeleted: (task: Task) -> Unit
+) {
+    val scope = rememberCoroutineScope()
 
-
-    ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -492,11 +479,13 @@ private fun HomeScreenContent(
                 exit = fadeOut() + shrinkVertically()
             ) {
                 SwipeableTaskItem(
+                    scope = scope,
                     task = task,
                     snackbarHostState = snackbarHostState,
                     onDelete = onTaskDeleted,
                     onComplete = onTaskCompleted,
-                    onUndo = onUndo,
+                    onUndoCompleted = onUndoCompleted,
+                    onUndoDeleted = onUndoDeleted,
                     onClick = onTaskClick
                 )
 
@@ -509,15 +498,16 @@ private fun HomeScreenContent(
 
 @Composable
 fun SwipeableTaskItem(
+    scope: CoroutineScope,
     task: Task,
     snackbarHostState: SnackbarHostState,
     onDelete: (Task) -> Unit,
     onComplete: (Task) -> Unit,
-    onUndo: (Task) -> Unit,
+    onUndoCompleted: (Task) -> Unit,
+    onUndoDeleted: (Task) -> Unit,
     onClick: (Task) -> Unit
 ) {
 
-    val scope = rememberCoroutineScope()
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { dismissValue ->
             when (dismissValue) {
@@ -531,7 +521,7 @@ fun SwipeableTaskItem(
                             duration = SnackbarDuration.Short
                         )
                         if (result == SnackbarResult.ActionPerformed) {
-                            onUndo(task)
+                            onUndoCompleted(task)
                         }
                     }
                     false
@@ -547,7 +537,7 @@ fun SwipeableTaskItem(
                             duration = SnackbarDuration.Short
                         )
                         if (result == SnackbarResult.ActionPerformed) {
-                            onUndo(task)
+                            onUndoDeleted(task)
                         }
                     }
                     false
@@ -712,6 +702,7 @@ fun TaskItem(task: Task, onClick: (Task) -> Unit) {
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun HomeScreenPreview() {
+
     // Sample tasks
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     val dueDate1 = dateFormat.parse("2025-04-10")?.time ?: 0L
@@ -737,7 +728,6 @@ fun HomeScreenPreview() {
     )
 
     HomeScreen(
-        uiState = HomeScreenUiState.Success(tasks = mockTasks),
         tasks = mockTasks,
         sortOption = SortOption.DUE_DATE,
         filterOption = FilterOption.ALL,
@@ -747,8 +737,9 @@ fun HomeScreenPreview() {
         onTaskClick = {},
         onTaskCompleted = {},
         onTaskDeleted = {},
-        onUndo = {},
-        onSettingsClick = {}
+        onUndoCompleted = {},
+        onSettingsClick = {},
+        onUndoDeleted = {}
     )
 }
 
