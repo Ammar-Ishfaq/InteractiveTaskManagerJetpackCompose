@@ -12,7 +12,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.m.ammar.itaskmanager.data.local.model.Task
-import com.m.ammar.itaskmanager.ui.create_task.TaskCreationScreen
+import com.m.ammar.itaskmanager.ui.task_detail.TaskDetailsScreen
+import com.m.ammar.itaskmanager.ui.task_creation.TaskCreationScreen
 import com.m.ammar.itaskmanager.ui.home.HomeScreen
 import com.m.ammar.itaskmanager.ui.home.HomeViewModel
 
@@ -21,6 +22,8 @@ fun AppNavigation(
     modifier: Modifier = Modifier,
     navController: NavHostController,
 ) {
+    val viewModel: HomeViewModel = hiltViewModel()
+
     NavHost(
         modifier = modifier,
         navController = navController,
@@ -28,7 +31,6 @@ fun AppNavigation(
     ) {
         composable(route = TopLevelDestination.Home.route) {
 
-            val viewModel: HomeViewModel = hiltViewModel()
             val uiState by remember { viewModel.response }.collectAsStateWithLifecycle()
             val tasks by viewModel.tasksFlow.collectAsState()
             val currentSort by viewModel.sortOption.collectAsState()
@@ -46,25 +48,59 @@ fun AppNavigation(
                 onSortChange = { viewModel.setSortOption(it) },
                 onFilterChange = { viewModel.setFilterOption(it) },
                 onCreateNewTask = { navController.navigate(TopLevelDestination.CreateTask.route) },
-                onTaskClick = { }
+                onTaskClick = { task ->
+                    viewModel.selectTask(task)
+                    navController.navigate(TopLevelDestination.TaskDetail.route)
+                },
+                onTaskCompleted = {
+                    viewModel.updateTask(it.copy(isCompleted = true))
+                },
+                onTaskDeleted = {
+                    viewModel.deleteTask(it)
+                },
+                onUndo = {
+                    viewModel.updateTask(it)
+                }
             )
         }
 
         composable(route = TopLevelDestination.CreateTask.route) {
-            val homeViewModel: HomeViewModel = hiltViewModel()
 
-            TaskCreationScreen { title, description, priority, dueDate ->
-                val task = Task(
-                    title = title,
-                    description = description,
-                    priority = priority,
-                    dueDate = dueDate,
-                    isCompleted = false
-                )
-                homeViewModel.addTask(task)
-                navController.popBackStack()
-            }
+            TaskCreationScreen(
+                onSaveClick = { title, description, priority, dueDate ->
+                    val task = Task(
+                        title = title,
+                        description = description,
+                        priority = priority,
+                        dueDate = dueDate,
+                        isCompleted = false
+                    )
+                    viewModel.addTask(task)
+                    navController.popBackStack()
+                },
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
 
         }
+        composable(route = TopLevelDestination.TaskDetail.route) {
+            val task by viewModel.selectedTask.collectAsState()
+
+            task?.let {
+                TaskDetailsScreen(
+                    task = it,
+                    onBack = { navController.popBackStack() },
+                    onDelete = {
+                        viewModel.deleteTask(it)
+                        navController.popBackStack()
+                    },
+                    onComplete = {
+                        viewModel.updateTask(it.copy(isCompleted = true))
+                    }
+                )
+            }
+        }
+
     }
 }

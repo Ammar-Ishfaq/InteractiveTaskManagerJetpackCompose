@@ -17,6 +17,11 @@ sealed class TopLevelDestination(
         route = "home"
     )
 
+    data object TaskDetail : TopLevelDestination(
+        title = "TaskDetail",
+        route = "task_detail"
+    )
+
 
     /**
      * This is a helper function to pass arguments to navigation destination.

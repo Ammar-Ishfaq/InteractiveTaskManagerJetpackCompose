@@ -27,12 +27,13 @@ class HomeViewModel @Inject constructor(
 
     fun loadData() {
         viewModelScope.launch {
-            _response.value = HomeScreenUiState.Empty
             try {
                 val tasks =
                     taskDao.getTasksSortedByPriority()
                 _allTasks.value = tasks
                 if (tasks.isNotEmpty()) _response.value = HomeScreenUiState.Success(tasks = tasks)
+                else _response.value = HomeScreenUiState.Empty
+
             } catch (e: Exception) {
                 _response.value = HomeScreenUiState.Error(
                     msg = e.message ?: "Something went wrong"
@@ -108,4 +109,12 @@ class HomeViewModel @Inject constructor(
         FilterOption.COMPLETED -> filter { it.isCompleted }
         FilterOption.PENDING -> filter { !it.isCompleted }
     }
+
+    private val _selectedTask = MutableStateFlow<Task?>(null)
+    val selectedTask: StateFlow<Task?> = _selectedTask
+
+    fun selectTask(task: Task) {
+        _selectedTask.value = task
+    }
+
 }
