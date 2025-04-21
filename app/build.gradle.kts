@@ -96,6 +96,14 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.accompanist.systemuicontroller)
 
+    // Unit testing
+    testImplementation(libs.junit)
+
+    // Kotlin coroutines testing
+    testImplementation(libs.kotlinx.coroutines.test)
+
+    // For mocking (optional but helpful)
+    testImplementation(libs.mockk)
 
 
 }
