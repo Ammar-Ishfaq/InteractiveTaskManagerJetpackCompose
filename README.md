@@ -25,7 +25,57 @@ A modern, interactive Task Manager app built with **Jetpack Compose**, **Room Da
 - **Coroutines + ViewModelScope**
 - **MVVM Architecture**
 - **Material Design 3**
+- 
+## 🖼️ Screenshots
 
+<table>
+  <tr>
+    <td><img src="./app/sampledata/01.png" alt="" width="250"/></td>
+    <td><img src="./app/sampledata/02.png" alt="" width="250"/></td>
+    <td><img src="./app/sampledata/03.png" alt="" width="250"/></td>
+  </tr>
+  <tr>
+    <td align="center">Home</td>
+    <td align="center">Add Task</td>
+    <td align="center">Task List</td>
+  </tr>
+  <tr>
+    <td><img src="./app/sampledata/04.png" alt="Settings" width="250"/></td>
+    <td><img src="./app/sampledata/05.png" alt="Filter" width="250"/></td>
+    <td><img src="./app/sampledata/06.png" alt="Sort" width="250"/></td>
+  </tr>
+  <tr>
+    <td align="center">Delete with Undo</td>
+    <td align="center">Filter</td>
+    <td align="center">Sort</td>
+  </tr>
+    <tr>
+    <td><img src="./app/sampledata/07.png" alt="Settings" width="250"/></td>
+    <td><img src="./app/sampledata/12.png" alt="Filter" width="250"/></td>
+    <td><img src="./app/sampledata/09.png" alt="Sort" width="250"/></td>
+  </tr>
+  <tr>
+    <td align="center">Task Detail</td>
+    <td align="center">Setting</td>
+    <td align="center">Home</td>
+  </tr>
+       <tr>
+    <td><img src="./app/sampledata/10.png" alt="Settings" width="250"/></td>
+    <td><img src="./app/sampledata/11.png" alt="Filter" width="250"/></td>
+    <td><img src="./app/sampledata/08.png" alt="Sort" width="250"/></td>
+  </tr>
+  <tr>
+    <td align="center">Add Task</td>
+    <td align="center">Setting</td>
+    <td align="center">Home</td>
+  </tr>
+</table>
+
+## 📱 Download & Demo
+
+-  🎥 [Watch the Demo](https://github.com/Ammar-Ishfaq/InteractiveTaskManagerJetpackCompose/tree/main/app/sampledata/sr.mp4)
+
+-  📦 [Download APK](https://github.com/Ammar-Ishfaq/InteractiveTaskManagerJetpackCompose/blob/main/app/sampledata/iTaskManager.apk)
 
 ## 🚀 Getting Started
 
