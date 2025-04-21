@@ -21,6 +21,10 @@ sealed class TopLevelDestination(
         title = "TaskDetail",
         route = "task_detail"
     )
+    data object Settings : TopLevelDestination(
+        title = "Settings",
+        route = "settings"
+    )
 
 
     /**

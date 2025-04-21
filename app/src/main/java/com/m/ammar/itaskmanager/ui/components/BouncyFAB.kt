@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -30,6 +31,7 @@ fun BouncyFAB(
     val haptic = LocalHapticFeedback.current
 
     FloatingActionButton(
+        containerColor = MaterialTheme.colorScheme.primary,
         onClick = {
             scope.launch {
                 scale.animateTo(

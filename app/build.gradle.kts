@@ -93,4 +93,9 @@ dependencies {
     implementation(libs.roomKtx)
     implementation(libs.lottie.compose)
 
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.accompanist.systemuicontroller)
+
+
+
 }

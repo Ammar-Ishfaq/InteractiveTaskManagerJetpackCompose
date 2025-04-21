@@ -1,5 +1,6 @@
 package com.m.ammar.itaskmanager.navigation
 
+import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -8,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,6 +18,8 @@ import com.m.ammar.itaskmanager.ui.task_detail.TaskDetailsScreen
 import com.m.ammar.itaskmanager.ui.task_creation.TaskCreationScreen
 import com.m.ammar.itaskmanager.ui.home.HomeScreen
 import com.m.ammar.itaskmanager.ui.home.HomeViewModel
+import com.m.ammar.itaskmanager.ui.settings.SettingsScreen
+import com.m.ammar.itaskmanager.ui.settings.SettingsViewModel
 
 @Composable
 fun AppNavigation(
@@ -23,6 +27,7 @@ fun AppNavigation(
     navController: NavHostController,
 ) {
     val viewModel: HomeViewModel = hiltViewModel()
+    val settingsViewModel: SettingsViewModel = hiltViewModel()
 
     NavHost(
         modifier = modifier,
@@ -60,6 +65,10 @@ fun AppNavigation(
                 },
                 onUndo = {
                     viewModel.updateTask(it)
+                },
+                onSettingsClick = {
+                    navController.navigate(TopLevelDestination.Settings.route)
+
                 }
             )
         }
@@ -100,6 +109,18 @@ fun AppNavigation(
                     }
                 )
             }
+        }
+        composable(route = TopLevelDestination.Settings.route) {
+
+            SettingsScreen(
+                themeMode = settingsViewModel.themeMode.value,
+                selectedColorSet = settingsViewModel.selectedColorSet.value,
+                onThemeModeChange = { settingsViewModel.updateThemeMode(it) },
+                onColorSetChange = { settingsViewModel.updateColorSet(it) },
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
         }
 
     }

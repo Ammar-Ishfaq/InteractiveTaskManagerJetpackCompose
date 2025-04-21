@@ -107,7 +107,8 @@ fun HomeScreen(
     onTaskClick: (taskId: Task) -> Unit,
     onTaskCompleted: (task: Task) -> Unit,
     onTaskDeleted: (task: Task) -> Unit,
-    onUndo: (task: Task) -> Unit
+    onUndo: (task: Task) -> Unit,
+    onSettingsClick: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarVisible = snackbarHostState.currentSnackbarData != null
@@ -204,7 +205,7 @@ fun HomeScreen(
                     .zIndex(1f)
             ) {
                 BouncyFAB(
-                    onClick = { /* onSettingsClick() */ },
+                    onClick = { onSettingsClick() },
                     icon = Icons.Default.Settings,
                     contentDescription = "Settings"
                 )
@@ -421,6 +422,7 @@ private fun TaskStatsHeader(tasks: List<Task>) {
             .padding(horizontal = 16.dp, vertical = 8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+
     ) {
         Box(
             modifier = Modifier
@@ -745,7 +747,8 @@ fun HomeScreenPreview() {
         onTaskClick = {},
         onTaskCompleted = {},
         onTaskDeleted = {},
-        onUndo = {}
+        onUndo = {},
+        onSettingsClick = {}
     )
 }
 

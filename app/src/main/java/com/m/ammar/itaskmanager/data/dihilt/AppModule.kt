@@ -2,6 +2,7 @@ package com.m.ammar.itaskmanager.data.dihilt
 
 import android.app.Application
 import android.content.Context
+import com.m.ammar.itaskmanager.data.local.data_store.SettingsRepository
 import com.m.ammar.itaskmanager.data.managers.DataManager
 import com.m.ammar.itaskmanager.data.managers.DataManagerImpl
 import com.m.ammar.itaskmanager.utility.ResourceProvider
@@ -32,6 +33,11 @@ object AppModule {
         return application
     }
 
+    @Singleton
+    @Provides
+    fun provideSettingsRepo(context: Context): SettingsRepository {
+        return SettingsRepository(context)
+    }
 
 
 }
