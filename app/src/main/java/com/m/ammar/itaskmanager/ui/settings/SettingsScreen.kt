@@ -41,7 +41,6 @@ import com.m.ammar.itaskmanager.ui.theme.ThemeSet1
 import com.m.ammar.itaskmanager.ui.theme.ThemeSet2
 import com.m.ammar.itaskmanager.ui.theme.ThemeSet3
 import com.m.ammar.itaskmanager.ui.theme.ThemeSet4
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -51,6 +50,15 @@ fun SettingsScreen(
     onColorSetChange: (ThemeSet) -> Unit,
     onBack: () -> Unit
 ) {
+    /**
+     * Displays the settings screen, including theme mode options (system, light, dark) and custom color theme sets.
+     *
+     * @param themeMode Current theme mode (light, dark, system).
+     * @param selectedColorSet The currently selected color set.
+     * @param onThemeModeChange Callback function to update the theme mode.
+     * @param onColorSetChange Callback function to update the color theme set.
+     * @param onBack Callback function for navigating back.
+     */
     val themeSets = listOf(ThemeSet1, ThemeSet2, ThemeSet3, ThemeSet4)
     val isSystemTheme = themeMode == ThemeMode.SYSTEM
 
@@ -144,8 +152,6 @@ fun SettingsScreen(
                 }
             }
         )
-
-
     }
 }
 
@@ -155,6 +161,13 @@ private fun ThemeModeItem(
     mode: ThemeMode,
     onClick: (ThemeMode) -> Unit,
 ) {
+    /**
+     * Displays a single theme mode option (RadioButton) and handles user selection.
+     *
+     * @param themeMode Current theme mode (light, dark, system).
+     * @param mode The theme mode option to display.
+     * @param onClick Callback function to update the theme mode.
+     */
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -179,6 +192,15 @@ private fun ColorSetItem(
     onClick: (ThemeSet) -> Unit,
     enabled: Boolean = true
 ) {
+    /**
+     * Displays a single color set option as a circular color preview and handles user selection.
+     *
+     * @param colorSet The color set to display.
+     * @param selectedColorSet The currently selected color set.
+     * @param themeMode Current theme mode (light or dark).
+     * @param onClick Callback function to change the selected color set.
+     * @param enabled Flag to indicate whether the item is selectable.
+     */
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier

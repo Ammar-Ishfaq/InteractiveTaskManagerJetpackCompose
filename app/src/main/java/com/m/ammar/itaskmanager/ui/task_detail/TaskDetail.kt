@@ -23,7 +23,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.m.ammar.itaskmanager.data.local.model.Task
-
+/**
+ * Composable function to display the details of a task.
+ *
+ * This screen presents the task's title and description. It provides buttons for marking the task as completed
+ * and deleting the task. A top app bar is included for navigation, and a bottom bar contains the action buttons.
+ *
+ * @param task The task object whose details are displayed.
+ * @param onComplete Lambda function to be called when the task is marked as completed.
+ * @param onDelete Lambda function to be called when the task is deleted.
+ * @param onBack Lambda function to be called when the back button is pressed.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskDetailsScreen(

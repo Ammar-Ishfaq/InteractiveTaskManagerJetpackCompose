@@ -7,7 +7,16 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import com.m.ammar.itaskmanager.data.local.enums.ThemeMode
 import com.m.ammar.itaskmanager.data.local.model.ThemeSet
-
+/**
+ * Composable function to apply a theme based on the selected theme mode and theme set.
+ *
+ * This function applies the appropriate color scheme based on the theme mode (light, dark, or system default)
+ * and the selected theme set. It updates the MaterialTheme with the relevant color scheme and typography.
+ *
+ * @param themeMode The mode for the theme (LIGHT, DARK, or SYSTEM).
+ * @param selectedThemeSet The theme set containing color definitions for light and dark modes.
+ * @param content A composable lambda that represents the content of the screen, which will be styled according to the selected theme.
+ */
 @Composable
 fun AppTheme(
     themeMode: ThemeMode,
@@ -58,4 +67,3 @@ fun AppTheme(
         content = content
     )
 }
-

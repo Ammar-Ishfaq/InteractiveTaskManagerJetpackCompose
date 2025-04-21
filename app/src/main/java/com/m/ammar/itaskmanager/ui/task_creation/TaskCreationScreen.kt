@@ -24,12 +24,21 @@ import com.m.ammar.itaskmanager.ui.components.StyledErrorSnackbarHost
 import kotlinx.coroutines.launch
 import java.util.*
 
+/**
+ * TaskCreationScreen is a composable that provides a UI for creating a new task.
+ * It allows users to input a title, description, select a priority, and pick a due date.
+ *
+ * @param onSaveClick A lambda function invoked when the user clicks the save button.
+ *      It receives the task title, description (optional), priority, and due date in milliseconds.
+ * @param onBack A lambda function invoked when the user clicks the back button in the top bar.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskCreationScreen(
     onSaveClick: (title: String, description: String?, priority: Priority, dueDateMillis: Long) -> Unit,
     onBack: () -> Unit
 ) {
+    // Local context and state for date picker, title, description, etc.
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
@@ -48,6 +57,7 @@ fun TaskCreationScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
+    // DatePicker Dialog logic
     if (showDatePicker.value) {
         DatePickerDialog(
             context,
@@ -64,6 +74,7 @@ fun TaskCreationScreen(
         ).show()
     }
 
+    // Scaffold for the UI layout with top bar, content, and snackbar for errors
     Scaffold(
         topBar = {
             TopAppBar(
@@ -91,6 +102,7 @@ fun TaskCreationScreen(
                     }
                     if (dueDateMillis == 0L) {
                         isDateValid = false
+                        showDatePicker.value = true
                         coroutineScope.launch {
                             snackbarHostState.showSnackbar("Please select a due date")
                         }
@@ -121,17 +133,14 @@ fun TaskCreationScreen(
                 value = title,
                 onValueChange = { title = it },
                 label = { Text("Title*") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequesterTitle),
+                modifier = Modifier.fillMaxWidth(),
                 keyboardActions = KeyboardActions(
                     onNext = {
                         focusRequesterDescription.requestFocus()
                     }
                 ),
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Next,
-                    keyboardType = KeyboardType.Text
+                    imeAction = ImeAction.Next
                 )
             )
 
@@ -177,10 +186,14 @@ fun TaskCreationScreen(
     }
 }
 
+/**
+ * Preview of the TaskCreationScreen with default lambdas for onSaveClick and onBack.
+ */
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun TaskCreationScreenPreview() {
     TaskCreationScreen(
-        onSaveClick = { title, description, priority, dueDate ->
-        }, {})
+        onSaveClick = { title, description, priority, dueDate -> },
+        onBack = {}
+    )
 }

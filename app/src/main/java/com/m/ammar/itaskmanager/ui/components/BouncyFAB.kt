@@ -20,30 +20,45 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import kotlinx.coroutines.launch
 
+/**
+ * A composable function that creates a bouncing FloatingActionButton (FAB).
+ * The button scales down and back up when clicked, with a haptic feedback effect.
+ *
+ * @param onClick Lambda function to be executed when the FAB is clicked.
+ * @param icon The icon to display inside the FAB.
+ * @param contentDescription Description of the icon, for accessibility purposes.
+ */
 @Composable
 fun BouncyFAB(
     onClick: () -> Unit,
     icon: ImageVector,
     contentDescription: String
 ) {
+    // Animatable state to handle the scaling animation of the FAB
     val scale = remember { Animatable(1f) }
+    // Coroutine scope for launching animations
     val scope = rememberCoroutineScope()
+    // Haptic feedback controller
     val haptic = LocalHapticFeedback.current
 
+    // FloatingActionButton with scaling and haptic feedback on click
     FloatingActionButton(
         containerColor = MaterialTheme.colorScheme.primary,
         onClick = {
+            // Launching the scaling animation when the FAB is clicked
             scope.launch {
                 scale.animateTo(
                     0.8f,
-                    animationSpec = tween(100, easing = LinearOutSlowInEasing)
+                    animationSpec = tween(100, easing = LinearOutSlowInEasing) // First scale down
                 )
                 scale.animateTo(
                     1f,
-                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy) // Then scale up
                 )
             }
+            // Perform haptic feedback to provide tactile feedback
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            // Execute the provided onClick lambda
             onClick()
         },
         modifier = Modifier
@@ -52,9 +67,8 @@ fun BouncyFAB(
                 scaleY = scale.value
             },
         content = {
+            // Display the icon inside the FAB
             Icon(imageVector = icon, contentDescription = contentDescription)
-
         }
     )
 }
-
