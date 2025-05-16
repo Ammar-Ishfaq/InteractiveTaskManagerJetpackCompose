@@ -4,10 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import com.m.ammar.itaskmanager.ui.App
-import com.m.ammar.itaskmanager.ui.settings.SettingsViewModel
+import com.m.ammar.itaskmanager.presentation.App
+import com.m.ammar.itaskmanager.presentation.settings.SettingsViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 /**
  * MainActivity serves as the entry point for the app.

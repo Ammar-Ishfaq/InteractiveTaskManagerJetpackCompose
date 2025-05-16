@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.accompanist.permissions)
+    implementation(libs.mockito.kotlin)
     ksp(libs.hilt.android.compiler)
 
 
@@ -105,5 +106,10 @@ dependencies {
     // For mocking (optional but helpful)
     testImplementation(libs.mockk)
 
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.okhttp.interceptor.logging)
 
 }

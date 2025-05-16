@@ -1,6 +1,9 @@
 package com.m.ammar.itaskmanager.data.managers
 
-import com.m.ammar.itaskmanager.utility.ResourceProvider
+import com.m.ammar.itaskmanager.data.local.dao.TaskDao
+import com.m.ammar.itaskmanager.data.providers.SettingsProvider
+import com.m.ammar.itaskmanager.data.providers.ApiProvider
+import com.m.ammar.itaskmanager.data.providers.ResourceProvider
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,6 +19,9 @@ import javax.inject.Singleton
 @Singleton
 class DataManagerImpl @Inject constructor(
     private val resourceProvider: ResourceProvider,
+    private val appService: ApiProvider,
+    private val settingsProvider: SettingsProvider,
+    private val taskDao: TaskDao,
 ) : DataManager {
 
     /**
@@ -25,5 +31,27 @@ class DataManagerImpl @Inject constructor(
      */
     override fun getResourceManager(): ResourceProvider {
         return resourceProvider
+    }
+
+    /**
+     * Provides an instance of [ApiProvider] for accessing APIs .
+     *
+     * @return A [ApiProvider] instance for API Request.
+     */
+    override fun getApiProvider(): ApiProvider {
+        return appService
+    }
+
+    /**
+     * Provides an instance of [SettingsProvider] for accessing settings .
+     *
+     * @return A [SettingsProvider] instance for settings.
+     */
+    override fun getSettingsProvider(): SettingsProvider {
+        return settingsProvider
+    }
+
+    override fun getTaskDaoProvider(): TaskDao {
+        return taskDao
     }
 }

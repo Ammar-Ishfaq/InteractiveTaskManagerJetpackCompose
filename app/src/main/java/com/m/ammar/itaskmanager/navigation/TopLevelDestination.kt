@@ -8,6 +8,11 @@ sealed class TopLevelDestination(
     val route: String
 ) {
 
+    /** Represents the "Splash" screen. */
+    data object Splash : TopLevelDestination(
+        title = "Splash",
+        route = "splash"
+    )
     /** Represents the "Create Task" screen. */
     data object CreateTask : TopLevelDestination(
         title = "CreateTask",

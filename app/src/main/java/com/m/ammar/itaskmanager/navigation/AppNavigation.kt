@@ -10,12 +10,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.m.ammar.itaskmanager.data.local.model.Task
-import com.m.ammar.itaskmanager.ui.home.HomeScreen
-import com.m.ammar.itaskmanager.ui.home.HomeViewModel
-import com.m.ammar.itaskmanager.ui.settings.SettingsScreen
-import com.m.ammar.itaskmanager.ui.settings.SettingsViewModel
-import com.m.ammar.itaskmanager.ui.task_creation.TaskCreationScreen
-import com.m.ammar.itaskmanager.ui.task_detail.TaskDetailsScreen
+import com.m.ammar.itaskmanager.presentation.home.HomeScreen
+import com.m.ammar.itaskmanager.presentation.home.HomeViewModel
+import com.m.ammar.itaskmanager.presentation.settings.SettingsScreen
+import com.m.ammar.itaskmanager.presentation.settings.SettingsViewModel
+import com.m.ammar.itaskmanager.presentation.splash.SplashScreen
+import com.m.ammar.itaskmanager.presentation.splash.SplashViewModel
+import com.m.ammar.itaskmanager.presentation.task_creation.TaskCreationScreen
+import com.m.ammar.itaskmanager.presentation.task_detail.TaskDetailsScreen
 
 /**
  * Composable function that handles the app's navigation.
@@ -32,13 +34,25 @@ fun AppNavigation(
     // Initialize ViewModels using Hilt
     val homeViewModel: HomeViewModel = hiltViewModel()
     val settingsViewModel: SettingsViewModel = hiltViewModel()
+    val splashViewModel: SplashViewModel = hiltViewModel()
 
     // Define the navigation host with routes to all major destinations
     NavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = TopLevelDestination.Home.route
+        startDestination = TopLevelDestination.Splash.route
     ) {
+        composable(route = TopLevelDestination.Splash.route) {
+            // Load data when the Home screen is first launched
+            LaunchedEffect(Unit) {
+                splashViewModel.loadQuote()
+            }
+
+            SplashScreen(splashViewModel.quote) {
+                navController.navigate(TopLevelDestination.Home.route)
+            }
+        }
+
         // Composable for the Home screen
         composable(route = TopLevelDestination.Home.route) {
             // Collect current data from HomeViewModel using lifecycle-aware state

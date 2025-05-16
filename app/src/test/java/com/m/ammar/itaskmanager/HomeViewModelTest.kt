@@ -1,8 +1,13 @@
 package com.m.ammar.itaskmanager
 
+import com.m.ammar.itaskmanager.data.local.dao.TaskDao
+import com.m.ammar.itaskmanager.data.providers.SettingsProvider
 import com.m.ammar.itaskmanager.data.local.model.Priority
 import com.m.ammar.itaskmanager.data.local.model.Task
-import com.m.ammar.itaskmanager.ui.home.HomeViewModel
+import com.m.ammar.itaskmanager.data.managers.DataManagerImpl
+import com.m.ammar.itaskmanager.data.providers.ApiProvider
+import com.m.ammar.itaskmanager.presentation.home.HomeViewModel
+import com.m.ammar.itaskmanager.data.providers.ResourceProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -17,22 +22,42 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.mock
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
-    // 1. Create test dispatcher and scope
+
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
+    private lateinit var fakeDao: TaskDao
+    private lateinit var resourceProvider: ResourceProvider
+    private lateinit var appService: ApiProvider
+    private lateinit var settingsProvider: SettingsProvider
+
+    private lateinit var repo: DataManagerImpl
     private lateinit var viewModel: HomeViewModel
-    private lateinit var fakeDao: FakeTaskDao
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
+
+        // Create mocks or fakes for dependencies
         fakeDao = FakeTaskDao()
-        viewModel = HomeViewModel(fakeDao)
+        resourceProvider = mock()
+        appService = mock()
+        settingsProvider = mock()
+
+        repo = DataManagerImpl(
+            resourceProvider = resourceProvider,
+            appService = appService,
+            settingsProvider = settingsProvider,
+            taskDao = fakeDao
+        )
+
+        viewModel = HomeViewModel(repo)
     }
+
 
     @After
     fun tearDown() {
@@ -79,7 +104,7 @@ class HomeViewModelTest {
             advanceUntilIdle()
 
             // Verify task was removed
-           var tasks = fakeDao.getAllTasksFlow().first()
+            var tasks = fakeDao.getAllTasksFlow().first()
             assertFalse(tasks.contains(task))
 
             // Simulate undo action

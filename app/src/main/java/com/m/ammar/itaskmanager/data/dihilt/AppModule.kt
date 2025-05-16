@@ -2,10 +2,10 @@ package com.m.ammar.itaskmanager.data.dihilt
 
 import android.app.Application
 import android.content.Context
-import com.m.ammar.itaskmanager.data.local.data_store.SettingsRepository
+import com.m.ammar.itaskmanager.data.providers.SettingsProvider
 import com.m.ammar.itaskmanager.data.managers.DataManager
 import com.m.ammar.itaskmanager.data.managers.DataManagerImpl
-import com.m.ammar.itaskmanager.utility.ResourceProvider
+import com.m.ammar.itaskmanager.data.providers.ResourceProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -45,14 +45,13 @@ object AppModule {
         return application
     }
 
-
     /**
-     * Provides a singleton instance of [SettingsRepository] for accessing app settings.
+     * Provides a singleton instance of [SettingsProvider] for accessing app settings.
      */
     @Singleton
     @Provides
-    fun provideSettingsRepo(context: Context): SettingsRepository {
-        return SettingsRepository(context)
+    fun provideSettingsRepo(context: Context): SettingsProvider {
+        return SettingsProvider(context)
     }
 
 
